@@ -1,0 +1,27 @@
+{
+  "name": "@jin-hwang/load-monitoring-webservice",
+  "version": "0.1.0",
+  "description": "A simple load monitoring web service",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ./src --fix",
+    "pretest": "npx lint",
+    "test": "jest"
+  },
+  "author": "Jinwoong Hwang",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^21.25.1",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
+}
