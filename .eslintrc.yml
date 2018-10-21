@@ -1,0 +1,23 @@
+env:
+  browser: true
+extends:
+  - standard
+  - eslint:recommended
+  - plugin:react/recommended
+  - plugin:jest/recommended
+globals:
+  fetch: true
+rules:
+  react/jsx-uses-react: error
+  react/jsx-uses-vars: error
+  jest/no-disabled-tests: warn
+  jest/no-focused-tests: warn
+  jest/no-identical-title: error
+  jest/prefer-to-have-length: warn
+settings:
+  react:
+    createClass: createReactClass
+    pragma: React
+    version: '16.0'
+  propWrapperFunctions:
+  - forbidExtraProps
