@@ -4,6 +4,10 @@
   "description": "A simple load monitoring web service",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "pack": "webpack --config webpack.config.js",
+    "build": "npm run pack && npm run babel",
+    "babel": "babel src -d views",
     "lint": "eslint ./src --fix",
     "pretest": "npx lint",
     "test": "jest"
@@ -11,9 +15,19 @@
   "author": "Jinwoong Hwang",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-redux": "^5.0.7",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.4",
     "commitizen": "^3.0.4",
     "cz-conventional-changelog": "^2.1.0",
     "eslint": "^5.7.0",
@@ -25,7 +39,9 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-standard": "^4.0.0",
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
   },
   "config": {
     "commitizen": {
