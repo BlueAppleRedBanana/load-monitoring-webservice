@@ -20,7 +20,8 @@
     "react-dom": "^16.5.2",
     "react-redux": "^5.0.7",
     "redux": "^3.7.2",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "victory": "^30.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
