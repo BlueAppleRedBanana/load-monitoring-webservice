@@ -7,7 +7,9 @@ exports.default = void 0;
 
 var _react = _interopRequireWildcard(require("react"));
 
-var _BarChart = _interopRequireDefault(require("./BarChart"));
+var _ErrorBoundary = _interopRequireDefault(require("./ErrorBoundary"));
+
+var _CpuStatsReader = _interopRequireDefault(require("./CpuStatsReader"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -45,11 +47,11 @@ function (_Component) {
   _createClass(App, [{
     key: "render",
     value: function render() {
-      return _react.default.createElement("div", {
+      return _react.default.createElement(_ErrorBoundary.default, null, _react.default.createElement("div", {
         className: "App"
       }, _react.default.createElement("header", {
         className: "App-header"
-      }, _react.default.createElement("p", null, "Edit ", _react.default.createElement("code", null, "src/App.js"), " and save to reload.")), _react.default.createElement(_BarChart.default, null));
+      }, _react.default.createElement("p", null, "Edit ", _react.default.createElement("code", null, "src/App.js"), " and save to reload.")), _react.default.createElement(_ErrorBoundary.default, null, _react.default.createElement(_CpuStatsReader.default, null))));
     }
   }]);
 

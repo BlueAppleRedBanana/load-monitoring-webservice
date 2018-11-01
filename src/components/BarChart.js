@@ -6,10 +6,10 @@ const sampleData = [
     { x: 2, y: 20 },
 ];
 
-const BarChart = () => {
+const BarChart = (data = sampleData) => {
     return (
         <VictoryChart>
-            <VictoryBar data={sampleData}/>
+            <VictoryBar data={data}/>
         </VictoryChart>
     )
 };

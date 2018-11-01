@@ -20,8 +20,9 @@ var sampleData = [{
 }];
 
 var BarChart = function BarChart() {
+  var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : sampleData;
   return _react.default.createElement(_victory.VictoryChart, null, _react.default.createElement(_victory.VictoryBar, {
-    data: sampleData
+    data: data
   }));
 };
 

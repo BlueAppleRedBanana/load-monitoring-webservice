@@ -4,7 +4,7 @@
   "description": "A simple load monitoring web service",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "npm run build && node index.js",
     "pack": "webpack --config webpack.config.js",
     "build": "npm run pack && npm run babel",
     "babel": "babel src -d views",
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
+    "moment": "^2.22.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-redux": "^5.0.7",
