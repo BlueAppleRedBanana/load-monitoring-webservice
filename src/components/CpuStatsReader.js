@@ -40,7 +40,7 @@ export default class CpuStatsReader extends React.Component {
 
                 // manage alert history
                 const alertHistory = this.state.alertHistory;
-                if (data.isAlertTriggered) {
+                if (data.isAlertUpdated) {
                     alertHistory.push({
                         timestamp: data.timestamp,
                         message: data.alert

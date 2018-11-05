@@ -63,20 +63,20 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         const processInfo = getProcessInfo();
         const cpuStat = getCpuStat();
 
-        const { alert, isAlertTriggered } = getAlertStatus(cpuStat, currentAlert, alertThreshold);
+        const { alert, isAlertUpdated } = getAlertStatus(cpuStat, currentAlert, alertThreshold);
         currentAlert = alert;
 
         /**
          * alert current alert status
-         * isAlertTriggered if alert status has changed
-         * @type {{cpuStat: {cpus: *, uptime: *, freemem: *, loadavg: {"1m", "5m", "15m"}, hostname: *, platform: *, arch: *}, processInfo: {title: *, pid: *, release: *, versions: *, argv: *, execArgv: *, execPath: *, cpuUsage: *, memoryUsage: *, uptime: *}, timestamp: string, alert: boolean, isAlertTriggered: boolean}}
+         * isAlertUpdated if alert status has changed
+         * @type {{cpuStat: {cpus: *, uptime: *, freemem: *, loadavg: {"1m", "5m", "15m"}, hostname: *, platform: *, arch: *}, processInfo: {title: *, pid: *, release: *, versions: *, argv: *, execArgv: *, execPath: *, cpuUsage: *, memoryUsage: *, uptime: *}, timestamp: string, alert: boolean, isAlertUpdated: boolean}}
          */
         const sample = {
             cpuStat,
             processInfo,
             timestamp,
             alert,
-            isAlertTriggered,
+            isAlertTriggered: isAlertUpdated,
         };
         return sample;
     };

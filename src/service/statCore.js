@@ -37,7 +37,7 @@ exports.getAlertStatus = function(cpuStat, currentAlert, alertThreshold) {
     }
     return {
         alert,
-        isAlertTriggered: (currentAlert !== alert),
+        isAlertUpdated: (currentAlert !== alert),
     };
 };
 

@@ -4,5 +4,5 @@
  * @returns {number}
  */
 exports.parseTickCpuLoad = function (cpuStat) {
-    return (cpuStat.loadavg['1m'] / cpuStat.cpus.length) * 2;
+    return (cpuStat.loadavg['1m'] / cpuStat.cpus.length);
 };
