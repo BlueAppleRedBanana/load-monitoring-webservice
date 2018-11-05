@@ -64,7 +64,6 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         const cpuStat = getCpuStat();
 
         const { alert, isAlertUpdated } = getAlertStatus(cpuStat, currentAlert, alertThreshold);
-        currentAlert = alert;
 
         /**
          * alert current alert status
