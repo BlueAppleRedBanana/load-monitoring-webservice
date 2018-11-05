@@ -1,7 +1,11 @@
 import React from 'react';
-import { VictoryChart, VictoryBar } from 'victory';
+
 import { parseTickCpuLoad } from '../utils/statHelper';
 import AlertHistoryList from "./AlertHistoryList";
+import BarChart from "./BarChart";
+import { VictoryChart, VictoryBar, VictoryAxis, VictoryTheme } from 'victory';
+import moment from "moment";
+import { last, get } from 'lodash';
 
 export default class CpuStatsReader extends React.Component {
     constructor() {
@@ -53,6 +57,7 @@ export default class CpuStatsReader extends React.Component {
                     }
                 }
 
+                console.log(this.state);
                 this.setState({
                     isLoading: false,
                     loadHistoryForChart: loadHistory,
@@ -99,7 +104,32 @@ export default class CpuStatsReader extends React.Component {
     render() {
         return (
             <div>
-                <VictoryChart>
+                <VictoryChart
+                    theme={VictoryTheme.material}
+                    domainPadding={{
+                        x: 20,
+                        y: 0,
+                    }}
+                    padding={{
+                        top: 0,
+                        bottom: 32,
+                        right: 12,
+                        left: 40,
+                    }}
+                >
+                    <VictoryAxis
+                        independentAxis
+                        style={{
+                            grid: { stroke: 'none' },
+                            ticks: { stroke: "grey", size: 5 },
+                            tickLabels: { fontSize: 8, padding: 5 }
+                        }}
+                        tickCount={10}
+                        tickFormat={x => moment(x).format('H:mm:ss')}
+                    />
+                    <VictoryAxis
+                        dependentAxis
+                    />
                     <VictoryBar data={this.state.loadHistoryForChart}/>
                 </VictoryChart>
                 <AlertHistoryList alertHistory={this.state.alertHistory}/>
