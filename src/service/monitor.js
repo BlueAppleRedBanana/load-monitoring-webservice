@@ -1,7 +1,5 @@
-const os = require('os');
-const process = require('process');
 const moment = require('moment');
-const util = require('../utils/statHelper.js');
+const { getProcessInfo, getCpuStat, getAlertStatus } = require('./statCore');
 
 /**
  * Monitor
@@ -14,14 +12,14 @@ const util = require('../utils/statHelper.js');
 module.exports = function Monitor(interval = 1000, window = 60, alertThreshold = 1) {
     var data = [];
     var alertHistory = [];
-    var alert = false;
+    var currentAlert = false;
     var intervalId;
 
     /**
      * start monitor process
      */
     Monitor.prototype.start = function() {
-        intervalId = setInterval(runner, 1000);
+        intervalId = setInterval(runner, interval);
     };
 
     /**
@@ -56,61 +54,17 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         if (data.length > 600) {
             data.shift();
         }
-        let stats = getStats();
+        let stats = getTickData();
         data.push(stats);
-        recordAlert(stats);
-
     };
 
-    var recordAlert = function(stats) {
-        if (alert && (util.parseTickCpuLoad(stats.cpuStat) < alertThreshold)) {
-            alert = false;
-            alertHistory.push(stats);
-        } else if (util.parseTickCpuLoad(stats.cpuStat) > alertThreshold) {
-            alert = true;
-            alertHistory.push(stats);
-        }
-    };
-
-    var getLoad = function() {
-        return os.loadavg()[0] / os.cpus().length
-    };
-
-    var getStats = function() {
-        const processInfo = {
-            title: process.title,
-            pid: process.pid,
-            release: process.release,
-            versions: process.versions,
-            argv: process.argv,
-            execArgv: process.execArgv,
-            execPath: process.execPath,
-            cpuUsage: process.cpuUsage(),
-            memoryUsage: process.memoryUsage(),
-            // mainModule: process.mainModule,
-            uptime: process.uptime()
-        };
-
-        const cpuStat = {
-            cpus: os.cpus(),
-            uptime: os.uptime(),
-            freemem: os.freemem(),
-            loadavg: loadavg(os.loadavg()),
-            hostname: os.hostname(),
-            platform: process.platform,
-            arch: process.arch
-        };
-
+    var getTickData = function() {
         const timestamp = moment().format();
-        let isAlertTriggered = false;
+        const processInfo = getProcessInfo();
+        const cpuStat = getCpuStat();
 
-        if (alert && (util.parseTickCpuLoad(cpuStat) < alertThreshold)) {
-            alert = false;
-            isAlertTriggered = true;
-        } else if (util.parseTickCpuLoad(cpuStat) > alertThreshold) {
-            alert = true;
-            isAlertTriggered = true;
-        }
+        const { alert, isAlertTriggered } = getAlertStatus(cpuStat, currentAlert, alertThreshold);
+        currentAlert = alert;
 
         /**
          * alert current alert status
@@ -125,14 +79,6 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
             isAlertTriggered,
         };
         return sample;
-    };
-
-    var loadavg = function(loadavg) {
-        return {
-            '1m': loadavg[0],
-            '5m': loadavg[1],
-            '15m': loadavg[2]
-        }
     };
 };
 
