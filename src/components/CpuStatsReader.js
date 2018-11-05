@@ -1,25 +1,25 @@
 import React from 'react';
-import { VictoryChart, VictoryBar } from 'victory'
+import { VictoryChart, VictoryBar } from 'victory';
+import { parseTickCpuLoad } from '../utils/statHelper';
+import AlertHistoryList from "./AlertHistoryList";
 
 export default class CpuStatsReader extends React.Component {
     constructor() {
         super();
         const loads = [];
         const defaultState = {
-            loadHistory: loads,
+            loadHistoryForChart: loads,
             intervalId: null,
             isLoading: false,
             error: null,
+            alertHistory: [],
         };
         this.state = defaultState;
     }
 
-    parseTickLoad(data) {
-        const cpuStat = data.cpuStat;
-        const load = (cpuStat.loadavg['1m'] / cpuStat.cpus.length);
+    getTickLoadForChart(data) {
+        const load = parseTickCpuLoad(data.cpuStat);
         const timestamp = data.timestamp;
-        console.log(this.state);
-
         return { x: timestamp, y: load };
     }
 
@@ -27,15 +27,36 @@ export default class CpuStatsReader extends React.Component {
         fetch('/stats')
             .then(res => res.json())
             .then(data => {
-                const tickLoad = this.parseTickLoad(data);
-                const history = this.state.loadHistory;
-                history.push(tickLoad);
-                if (history.length > 600) {
-                    history.shift();
+
+                // get load
+                const tickLoadForChart = this.getTickLoadForChart(data);
+
+                // manage cpu load history
+                const loadHistory = this.state.loadHistoryForChart;
+                loadHistory.push(tickLoadForChart);
+                if (loadHistory.length > 600) {
+                    loadHistory.shift();
                 }
+
+                // manage alert history
+                const alertHistory = this.state.alertHistory;
+                if (data.isAlertTriggered) {
+                    alertHistory.push({
+                        timestamp: data.timestamp,
+                        message: data.alert
+                            ? 'alert triggered'
+                            : 'alert disabled',
+                        load: parseTickCpuLoad(data.cpuStat),
+                    });
+                    if (alertHistory.length > 100) {
+                        loadHistory.shift();
+                    }
+                }
+
                 this.setState({
                     isLoading: false,
-                    loadHistory: history,
+                    loadHistoryForChart: loadHistory,
+                    alertHistory: alertHistory,
                 });
             })
             .catch(error => {
@@ -53,12 +74,12 @@ export default class CpuStatsReader extends React.Component {
             .then(data => {
                 const history = [];
                 data.forEach(tickData => {
-                    const tickLoad = this.parseTickLoad(tickData);
+                    const tickLoad = this.getTickLoadForChart(tickData);
                     history.push(tickLoad);
                 });
                 this.setState({
                     isLoading: false,
-                    loadHistory: history,
+                    loadHistoryForChart: history,
                 });
                 return true;
             })
@@ -77,9 +98,12 @@ export default class CpuStatsReader extends React.Component {
 
     render() {
         return (
-            <VictoryChart>
-                <VictoryBar data={this.state.loadHistory}/>
-            </VictoryChart>
+            <div>
+                <VictoryChart>
+                    <VictoryBar data={this.state.loadHistoryForChart}/>
+                </VictoryChart>
+                <AlertHistoryList alertHistory={this.state.alertHistory}/>
+            </div>
         );
     }
 }
