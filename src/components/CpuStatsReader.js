@@ -65,6 +65,7 @@ export default class CpuStatsReader extends React.Component {
         fetch('/getAlertThreshold')
             .then(res => res.json())
             .then(data => this.setState({ alertThreshold: data }));
+
         // initial load to catch up the past history
         // it grabs list of tick data
         fetch('/getAllData')

@@ -1,5 +1,5 @@
 const moment = require('moment');
-const { getProcessInfo, getCpuStat } = require('./statCore');
+const { getProcessInfo, getCpuStat } = require('./stat');
 
 const AlertManager = require('./alertManager');
 
