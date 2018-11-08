@@ -101,3 +101,4 @@ After fetching `/getAllData` it starts a polling process fetching `/getLatestDat
 ## Note
 - `npm run jest` and `npm run lint` are not working. To run test, please use `npx jest`
 - Even though redux / redux-thunk is setup, this application does not use Redux.
+- babel includes test files.
