@@ -41,12 +41,10 @@ export default class CpuStatsReader extends React.Component {
 
                 // manage alert history
                 const alertHistory = this.state.alertHistory;
-                console.log(data.alert);
                 if (data.alert) {
                     alertHistory.push(data.alert);
                 }
 
-                console.log(this.state);
                 this.setState({
                     isLoading: false,
                     loadHistoryForChart: loadHistory,

@@ -1,6 +1,5 @@
 const os = require('os');
 const process = require('process');
-const util = require('../utils/statHelper.js');
 
 exports.getProcessInfo = function() {
     return {
@@ -30,27 +29,7 @@ exports.getCpuStat = function() {
     };
 };
 
-/**
- *
- * @param deltasToAlertThreshold
- * @param currentAlert
- * @returns {{alert: boolean, isAlertUpdated: boolean, sumOfDeltas: *}}
- */
-exports.getAlertStatus = function(deltasToAlertThreshold, currentAlert) {
-    const sumOfDeltas = deltasToAlertThreshold.reduce((a, b) => a + b, 0);
-    console.log(deltasToAlertThreshold, sumOfDeltas);
 
-    // if the sum of recent delta is over than zero
-    // then avg load for recent records is over than threshold
-    const alert = sumOfDeltas >= 0;
-    const isAlertUpdated = currentAlert !== alert;
-
-    return {
-        alert,
-        isAlertUpdated,
-        sumOfDeltas,
-    };
-};
 
 function loadavg(loadavg) {
     return {

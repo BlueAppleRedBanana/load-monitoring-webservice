@@ -1,6 +1,7 @@
 const moment = require('moment');
-const { getProcessInfo, getCpuStat, getAlertStatus } = require('./statCore');
-const { parseTickCpuLoad } = require('../utils/statHelper');
+const { getProcessInfo, getCpuStat } = require('./statCore');
+
+const AlertManager = require('./alertManager');
 
 /**
  * Monitor
@@ -12,21 +13,11 @@ const { parseTickCpuLoad } = require('../utils/statHelper');
  */
 module.exports = function Monitor(interval = 1000, window = 60, alertThreshold = 1) {
     let intervalId;
-
     const data = []
-    const alertHistory = [];
-
-    let currentAlert = false;
-
-    // the number of records to check alert
-    const WINDOW_SIZE_FOR_ALERT = 3;
-
-    // keep recent WINDOW_SIZE_FOR_ALERT records of delta values against to alertThreshold
-    // so that we can check if avg load for recent 12 records are over or under
-    // the threshold
-    const deltasToAlertThreshold = [];
 
     let tickIndex = 0;
+
+    const alertManager = new AlertManager({ alertThreshold });
 
     /**
      * start monitor process
@@ -74,53 +65,23 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
     };
 
     Monitor.prototype.getAllAlertHistory = function() {
-        return alertHistory;
+        return alertManager.getAllAlertHistory();
     };
 
     let getTickData = function() {
         const timestamp = moment().format();
+        tickIndex++;
+
         const processInfo = getProcessInfo();
         const cpuStat = getCpuStat();
 
-        // manage delta
-        if (deltasToAlertThreshold.length >= WINDOW_SIZE_FOR_ALERT) {
-            deltasToAlertThreshold.shift();
-        }
-        const cpuLoad = parseTickCpuLoad(cpuStat);
-        const delta = cpuLoad - alertThreshold;
-        deltasToAlertThreshold.push(delta);
-        console.log(cpuLoad);
+        const alert = alertManager.getAlert({ cpuStat, timestamp, tickIndex });
 
-        const { alert, isAlertUpdated, sumOfDeltas } = getAlertStatus(deltasToAlertThreshold, currentAlert);
-        currentAlert = alert;
-
-
-        let alertData = null;
-
-        let alertLoad = ( sumOfDeltas / WINDOW_SIZE_FOR_ALERT) + alertThreshold;
-        if (isAlertUpdated) {
-            alertData = {
-                timestamp,
-                message: alert
-                    ? 'High load generated an alert - load = ' + alertLoad + ', triggered at ' + timestamp
-                    : 'Alert is recovered - load = ' + alertLoad + ', at ' + timestamp
-                ,
-                load: alertLoad,
-                tickIndex: tickIndex++,
-            };
-            alertHistory.push(alertData);
-        }
-
-        /**
-         * alert current alert status
-         * isAlertUpdated if alert status has changed
-         * @type {{cpuStat: {cpus: *, uptime: *, freemem: *, loadavg: {"1m", "5m", "15m"}, hostname: *, platform: *, arch: *}, processInfo: {title: *, pid: *, release: *, versions: *, argv: *, execArgv: *, execPath: *, cpuUsage: *, memoryUsage: *, uptime: *}, timestamp: string, alert: boolean, isAlertUpdated: boolean}}
-         */
         const sample = {
             cpuStat,
             processInfo,
             timestamp,
-            alert: alertData,
+            alert,
         };
         return sample;
     };
