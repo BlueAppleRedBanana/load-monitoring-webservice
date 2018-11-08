@@ -26,6 +26,8 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
     // the threshold
     const deltasToAlertThreshold = [];
 
+    let tickIndex = 0;
+
     /**
      * start monitor process
      */
@@ -95,14 +97,16 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
 
         let alertData = null;
 
+        let alertLoad = ( sumOfDeltas / WINDOW_SIZE_FOR_ALERT) + alertThreshold;
         if (isAlertUpdated) {
             alertData = {
                 timestamp,
                 message: alert
-                    ? 'alert triggered'
-                    : 'alert disabled',
-                load: ( sumOfDeltas / WINDOW_SIZE_FOR_ALERT) + alertThreshold,
-                tickIndex: data.length,
+                    ? 'High load generated an alert - load = ' + alertLoad + ', triggered at ' + timestamp
+                    : 'Alert is recovered - load = ' + alertLoad + ', at ' + timestamp
+                ,
+                load: alertLoad,
+                tickIndex: tickIndex++,
             };
             alertHistory.push(alertData);
         }
