@@ -5,7 +5,7 @@ module.exports = function AlertManager({ alertThreshold }) {
 
     let currentAlert = false;
 
-    // the number of records to check alert
+    // the number of past records that alert rule is interested
     const WINDOW_SIZE_FOR_ALERT = 12;
 
     // keep recent WINDOW_SIZE_FOR_ALERT records of delta values against to alertThreshold

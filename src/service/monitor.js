@@ -11,7 +11,7 @@ const AlertManager = require('./alertManager');
  * @param window how long monitor should keep the history, number of ticks
  * @param alertThreshold cpu load threshold to alert
  */
-module.exports = function Monitor(interval = 1000, window = 60, alertThreshold = 1) {
+module.exports = function Monitor(interval = 10000, window = 60, alertThreshold = 1) {
     let intervalId;
     const data = []
 
