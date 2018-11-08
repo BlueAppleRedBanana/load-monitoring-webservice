@@ -11,7 +11,6 @@ const { getProcessInfo, getCpuStat, getAlertStatus } = require('./statCore');
  */
 module.exports = function Monitor(interval = 1000, window = 60, alertThreshold = 1) {
     var data = [];
-    var alertHistory = [];
     var currentAlert = false;
     var intervalId;
 
@@ -37,11 +36,6 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         return data;
     };
 
-
-    Monitor.prototype.getAllAlertHistory = function() {
-        return alertHistory;
-    };
-
     /**
      * get latest tick data
      * @returns {*}
@@ -64,6 +58,7 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         const cpuStat = getCpuStat();
 
         const { alert, isAlertUpdated } = getAlertStatus(cpuStat, currentAlert, alertThreshold);
+        currentAlert = alert;
 
         /**
          * alert current alert status
@@ -75,7 +70,7 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
             processInfo,
             timestamp,
             alert,
-            isAlertTriggered: isAlertUpdated,
+            isAlertUpdated,
         };
         return sample;
     };

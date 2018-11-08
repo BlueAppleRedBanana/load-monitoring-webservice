@@ -28,7 +28,7 @@ export default class CpuStatsReader extends React.Component {
     }
 
     pollTickLoad() {
-        fetch('/stats')
+        fetch('/getLatestData')
             .then(res => res.json())
             .then(data => {
 
@@ -44,6 +44,7 @@ export default class CpuStatsReader extends React.Component {
 
                 // manage alert history
                 const alertHistory = this.state.alertHistory;
+                console.log(data.alert, data.isAlertUpdated);
                 if (data.isAlertUpdated) {
                     alertHistory.push({
                         timestamp: data.timestamp,
@@ -51,6 +52,7 @@ export default class CpuStatsReader extends React.Component {
                             ? 'alert triggered'
                             : 'alert disabled',
                         load: parseTickCpuLoad(data.cpuStat),
+                        tickIndex: alertHistory.length,
                     });
                     if (alertHistory.length > 100) {
                         loadHistory.shift();
@@ -74,7 +76,10 @@ export default class CpuStatsReader extends React.Component {
 
     componentDidMount() {
         this.setState({ isLoading: true });
-        fetch('/statsAll')
+
+        // initial load to catch up the past history
+        // it grabs list of tick data
+        fetch('/getAllData')
             .then(res => res.json())
             .then(data => {
                 const history = [];
@@ -92,12 +97,16 @@ export default class CpuStatsReader extends React.Component {
                 if (!success) {
                     console.log('initial load failed');
                 }
+                // Run polling.
+                // this will be a separated process,
+                // so we have to bind `this` to the poll function
                 let intervalId = setInterval(this.pollTickLoad.bind(this), 1000);
                 this.setState({ intervalId: intervalId });
             });
     }
 
     componentWillUnmount() {
+        // kill the interval process to prevent zombie process.
         clearInterval(this.state.intervalId);
     }
 

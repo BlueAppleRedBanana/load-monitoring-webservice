@@ -29,7 +29,7 @@ export default class AlertHistoryList extends React.Component {
 const Item = (props) => {
     return (
         <li>
-            time: {props.timestamp} {props.message}  load: {props.load}
+            time: {props.timestamp} {props.message}  load: {props.load} index: {props.tickIndex}
         </li>
     );
 }

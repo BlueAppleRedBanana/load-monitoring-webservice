@@ -7,19 +7,18 @@ const Monitor = require('./src/service/monitor');
 const monitor = new Monitor();
 monitor.start();
 
-app.get('/stats', function (req, res) {
+app.get('/getLatestData', function (req, res) {
   const sample = monitor.getLatestData();
   res.send(sample)
 });
 
-app.get('/statsAll', function (req, res) {
+app.get('/getAllData', function (req, res) {
   const sample = monitor.getAllData();
   res.send(sample);
 });
 
 // Serving static files
 app.use('/assets', express.static(path.resolve(__dirname, 'assets')));
-app.use('/media', express.static(path.resolve(__dirname, 'media')));
 
 
 // Starting the server
