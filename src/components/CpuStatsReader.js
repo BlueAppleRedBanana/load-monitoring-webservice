@@ -2,17 +2,14 @@ import React from 'react';
 
 import { parseTickCpuLoad } from '../utils/statHelper';
 import AlertHistoryList from "./AlertHistoryList";
-import BarChart from "./BarChart";
-import { VictoryChart, VictoryBar, VictoryAxis, VictoryTheme } from 'victory';
-import moment from "moment";
-import { last, get } from 'lodash';
+import CpuLoadBarChart from "./CpuLoadBarChart";
 
 export default class CpuStatsReader extends React.Component {
     constructor() {
         super();
-        const loads = [];
         const defaultState = {
-            loadHistoryForChart: loads,
+            alertThreshold: undefined,
+            loadHistoryForChart: [],
             intervalId: null,
             isLoading: false,
             error: null,
@@ -44,19 +41,9 @@ export default class CpuStatsReader extends React.Component {
 
                 // manage alert history
                 const alertHistory = this.state.alertHistory;
-                console.log(data.alert, data.isAlertUpdated);
-                if (data.isAlertUpdated) {
-                    alertHistory.push({
-                        timestamp: data.timestamp,
-                        message: data.alert
-                            ? 'alert triggered'
-                            : 'alert disabled',
-                        load: parseTickCpuLoad(data.cpuStat),
-                        tickIndex: alertHistory.length,
-                    });
-                    if (alertHistory.length > 100) {
-                        loadHistory.shift();
-                    }
+                console.log(data.alert);
+                if (data.alert) {
+                    alertHistory.push(data.alert);
                 }
 
                 console.log(this.state);
@@ -77,6 +64,9 @@ export default class CpuStatsReader extends React.Component {
     componentDidMount() {
         this.setState({ isLoading: true });
 
+        fetch('/getAlertThreshold')
+            .then(res => res.json())
+            .then(data => this.setState({ alertThreshold: data }));
         // initial load to catch up the past history
         // it grabs list of tick data
         fetch('/getAllData')
@@ -91,18 +81,21 @@ export default class CpuStatsReader extends React.Component {
                     isLoading: false,
                     loadHistoryForChart: history,
                 });
-                return true;
             })
-            .then(success => {
-                if (!success) {
-                    console.log('initial load failed');
-                }
+            .then(() => {
                 // Run polling.
                 // this will be a separated process,
                 // so we have to bind `this` to the poll function
                 let intervalId = setInterval(this.pollTickLoad.bind(this), 1000);
                 this.setState({ intervalId: intervalId });
             });
+
+        fetch('/getAllAlertHistory')
+            .then(res => res.json())
+            .then(data => {
+                this.setState({ alertHistory: data });
+            });
+
     }
 
     componentWillUnmount() {
@@ -113,34 +106,10 @@ export default class CpuStatsReader extends React.Component {
     render() {
         return (
             <div>
-                <VictoryChart
-                    theme={VictoryTheme.material}
-                    domainPadding={{
-                        x: 20,
-                        y: 0,
-                    }}
-                    padding={{
-                        top: 0,
-                        bottom: 32,
-                        right: 12,
-                        left: 40,
-                    }}
-                >
-                    <VictoryAxis
-                        independentAxis
-                        style={{
-                            grid: { stroke: 'none' },
-                            ticks: { stroke: "grey", size: 5 },
-                            tickLabels: { fontSize: 8, padding: 5 }
-                        }}
-                        tickCount={10}
-                        tickFormat={x => moment(x).format('H:mm:ss')}
-                    />
-                    <VictoryAxis
-                        dependentAxis
-                    />
-                    <VictoryBar data={this.state.loadHistoryForChart}/>
-                </VictoryChart>
+                <CpuLoadBarChart
+                    loadHistoryForChart={this.state.loadHistoryForChart}
+                    alertThreshold={this.alertThreshold}
+                />
                 <AlertHistoryList alertHistory={this.state.alertHistory}/>
             </div>
         );

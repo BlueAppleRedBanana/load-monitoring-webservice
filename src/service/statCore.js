@@ -30,14 +30,25 @@ exports.getCpuStat = function() {
     };
 };
 
-exports.getAlertStatus = function(cpuStat, currentAlert, alertThreshold) {
-    let alert = false;
-    if (util.parseTickCpuLoad(cpuStat) >= alertThreshold) {
-        alert = true;
-    }
+/**
+ *
+ * @param deltasToAlertThreshold
+ * @param currentAlert
+ * @returns {{alert: boolean, isAlertUpdated: boolean, sumOfDeltas: *}}
+ */
+exports.getAlertStatus = function(deltasToAlertThreshold, currentAlert) {
+    const sumOfDeltas = deltasToAlertThreshold.reduce((a, b) => a + b, 0);
+    console.log(deltasToAlertThreshold, sumOfDeltas);
+
+    // if the sum of recent delta is over than zero
+    // then avg load for recent records is over than threshold
+    const alert = sumOfDeltas >= 0;
+    const isAlertUpdated = currentAlert !== alert;
+
     return {
         alert,
-        isAlertUpdated: (currentAlert !== alert),
+        isAlertUpdated,
+        sumOfDeltas,
     };
 };
 

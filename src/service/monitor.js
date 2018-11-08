@@ -1,5 +1,6 @@
 const moment = require('moment');
 const { getProcessInfo, getCpuStat, getAlertStatus } = require('./statCore');
+const { parseTickCpuLoad } = require('../utils/statHelper');
 
 /**
  * Monitor
@@ -10,9 +11,20 @@ const { getProcessInfo, getCpuStat, getAlertStatus } = require('./statCore');
  * @param alertThreshold cpu load threshold to alert
  */
 module.exports = function Monitor(interval = 1000, window = 60, alertThreshold = 1) {
-    var data = [];
-    var currentAlert = false;
-    var intervalId;
+    let intervalId;
+
+    const data = []
+    const alertHistory = [];
+
+    let currentAlert = false;
+
+    // the number of records to check alert
+    const WINDOW_SIZE_FOR_ALERT = 3;
+
+    // keep recent WINDOW_SIZE_FOR_ALERT records of delta values against to alertThreshold
+    // so that we can check if avg load for recent 12 records are over or under
+    // the threshold
+    const deltasToAlertThreshold = [];
 
     /**
      * start monitor process
@@ -26,6 +38,13 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
      */
     Monitor.prototype.stop = function() {
         clearInterval(intervalId);
+    };
+
+    /**
+     * get current alert threshold
+     */
+    Monitor.prototype.getAlertThreshold = function() {
+        return alertThreshold;
     };
 
     /**
@@ -44,7 +63,7 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         return data[data.length-1];
     };
 
-    var runner = function() {
+    let runner = function() {
         if (data.length > 600) {
             data.shift();
         }
@@ -52,13 +71,41 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
         data.push(stats);
     };
 
-    var getTickData = function() {
+    Monitor.prototype.getAllAlertHistory = function() {
+        return alertHistory;
+    };
+
+    let getTickData = function() {
         const timestamp = moment().format();
         const processInfo = getProcessInfo();
         const cpuStat = getCpuStat();
 
-        const { alert, isAlertUpdated } = getAlertStatus(cpuStat, currentAlert, alertThreshold);
+        // manage delta
+        if (deltasToAlertThreshold.length >= WINDOW_SIZE_FOR_ALERT) {
+            deltasToAlertThreshold.shift();
+        }
+        const cpuLoad = parseTickCpuLoad(cpuStat);
+        const delta = cpuLoad - alertThreshold;
+        deltasToAlertThreshold.push(delta);
+        console.log(cpuLoad);
+
+        const { alert, isAlertUpdated, sumOfDeltas } = getAlertStatus(deltasToAlertThreshold, currentAlert);
         currentAlert = alert;
+
+
+        let alertData = null;
+
+        if (isAlertUpdated) {
+            alertData = {
+                timestamp,
+                message: alert
+                    ? 'alert triggered'
+                    : 'alert disabled',
+                load: ( sumOfDeltas / WINDOW_SIZE_FOR_ALERT) + alertThreshold,
+                tickIndex: data.length,
+            };
+            alertHistory.push(alertData);
+        }
 
         /**
          * alert current alert status
@@ -69,8 +116,7 @@ module.exports = function Monitor(interval = 1000, window = 60, alertThreshold =
             cpuStat,
             processInfo,
             timestamp,
-            alert,
-            isAlertUpdated,
+            alert: alertData,
         };
         return sample;
     };
